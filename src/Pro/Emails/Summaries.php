@@ -1,0 +1,47 @@
+<?php
+namespace WPForms\Pro\Emails;
+
+use WPForms\Emails\Summaries as BaseSummaries;
+
+/**
+ * Email Summaries.
+ *
+ * @since 1.8.8
+ */
+class Summaries extends BaseSummaries {
+
+	/**
+	 * Constructor for the class.
+	 * Initializes the object and registers the Lite weekly entries count cron schedule.
+	 *
+	 * @since 1.8.8
+	 */
+	public function __construct() {
+
+		parent::__construct();
+
+		// Register the re-engagement alert filter for both cron and preview paths.
+		( new ReengagementAlert() )->init();
+
+		// Unregister it if scheduled.
+		$this->maybe_unregister_entries_count_schedule();
+	}
+
+	/**
+	 * Check if the weekly entries count cron schedule is registered and unregister it if scheduled.
+	 * This function helps in managing the scheduled cron job for counting weekly entries.
+	 *
+	 * @since 1.8.8
+	 */
+	private function maybe_unregister_entries_count_schedule() {
+
+		// Check if the cron job is scheduled.
+		if ( false === wp_next_scheduled( 'wpforms_weekly_entries_count_cron' ) ) {
+			// If not scheduled, return without performing any action.
+			return;
+		}
+
+		// Clear the scheduled hook for the weekly entries count cron job.
+		wp_clear_scheduled_hook( 'wpforms_weekly_entries_count_cron' );
+	}
+}
